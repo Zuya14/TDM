@@ -3,7 +3,7 @@ import numpy as np
 
 class HindsightReplayBuffer():
 
-    def __init__(self, buffer_size, state_shape, action_shape, goal_shape, device):
+    def __init__(self, buffer_size, state_size, action_size, goal_size, device):
         # 次にデータを挿入するインデックス．
         self._p = 0
         # データ数．
@@ -12,12 +12,12 @@ class HindsightReplayBuffer():
         self.buffer_size = buffer_size
 
         # GPU上に保存するデータ．
-        self.states = torch.empty((buffer_size, *state_shape), dtype=torch.float, device=device)
-        self.actions = torch.empty((buffer_size, *action_shape), dtype=torch.float, device=device)
+        self.states = torch.empty((buffer_size, *state_size), dtype=torch.float, device=device)
+        self.actions = torch.empty((buffer_size, *action_size), dtype=torch.float, device=device)
         self.rewards = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
         self.dones = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
-        self.next_states = torch.empty((buffer_size, *state_shape), dtype=torch.float, device=device)
-        self.goals = torch.empty((buffer_size, *goal_shape), dtype=torch.float, device=device)
+        self.next_states = torch.empty((buffer_size, *state_size), dtype=torch.float, device=device)
+        self.goals = torch.empty((buffer_size, *goal_size), dtype=torch.float, device=device)
 
     def append(self, state, action, reward, done, next_state, goal):
         self.states[self._p].copy_(torch.from_numpy(state))
@@ -43,7 +43,7 @@ class HindsightReplayBuffer():
 
 class TDM_HindsightReplayBuffer():
 
-    def __init__(self, buffer_size, state_shape, action_shape, goal_shape, device):
+    def __init__(self, buffer_size, state_size, action_size, goal_size, device):
         # 次にデータを挿入するインデックス．
         self._p = 0
         # データ数．
@@ -52,12 +52,12 @@ class TDM_HindsightReplayBuffer():
         self.buffer_size = buffer_size
 
         # GPU上に保存するデータ．
-        self.states = torch.empty((buffer_size, *state_shape), dtype=torch.float, device=device)
-        self.actions = torch.empty((buffer_size, *action_shape), dtype=torch.float, device=device)
+        self.states = torch.empty((buffer_size, *state_size), dtype=torch.float, device=device)
+        self.actions = torch.empty((buffer_size, *action_size), dtype=torch.float, device=device)
         self.rewards = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
         self.dones = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
-        self.next_states = torch.empty((buffer_size, *state_shape), dtype=torch.float, device=device)
-        self.goals = torch.empty((buffer_size, *goal_shape), dtype=torch.float, device=device)
+        self.next_states = torch.empty((buffer_size, *state_size), dtype=torch.float, device=device)
+        self.goals = torch.empty((buffer_size, *goal_size), dtype=torch.float, device=device)
         self.num_steps_lefts = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
 
     def append(self, state, action, reward, done, next_state, goal, num_steps_left):
