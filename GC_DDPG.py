@@ -1,6 +1,8 @@
-from DDPG import DDPG
+from DDPG import DDPG, ActorNetwork, CriticNetwork
 from HindsightReplayBuffer import HindsightReplayBuffer
-
+import torch
+import numpy as np
+import random
 
 class GC_DDPG(DDPG):
 
@@ -33,21 +35,20 @@ class GC_DDPG(DDPG):
             device=device,
         )
 
-
         # Actor-Criticのネットワークを構築する．
         self.actor = ActorNetwork(
-            state_size=state_size+goal_size,
-            action_size=action_size,
+            state_size=state_size[0]+goal_size[0],
+            action_size=action_size[0],
             hidden_size=hidden_size
         ).to(device)
         self.critic = CriticNetwork(
-            state_size=state_size+goal_size,
-            action_size=action_size,
+            state_size=state_size[0]+goal_size[0],
+            action_size=action_size[0],
             hidden_size=hidden_size
         ).to(device)
         self.critic_target = CriticNetwork(
-            state_size=state_size+goal_size,
-            action_size=action_size,
+            state_size=state_size[0]+goal_size[0],
+            action_size=action_size[0],
             hidden_size=hidden_size
         ).to(device).eval()
 
@@ -59,6 +60,96 @@ class GC_DDPG(DDPG):
         # オプティマイザ．
         self.optim_actor = torch.optim.Adam(self.actor.parameters(), lr=lr_actor)
         self.optim_critic = torch.optim.Adam(self.critic.parameters(), lr=lr_critic)
+    
+    def exploit(self, state, goal):
+        """ 決定論的な行動を返す． """
+        state = torch.tensor(np.concatenate([state, goal]), dtype=torch.float, device=self.device).unsqueeze_(0)
+        with torch.no_grad():
+            action = self.actor(state)
+        return action.cpu().numpy()[0]
+
+    def step(self, env, state, goal, t, steps):
+        t += 1
+
+        # 学習初期の一定期間(start_steps)は，ランダムに行動して多様なデータの収集を促進する．
+        if steps <= self.start_steps:
+            action = env.action_space.sample()
+        else:
+            if random.random() < self.epsilon_func(steps):
+                action = env.action_space.sample()
+            else:
+                with torch.no_grad():
+                    action = self.exploit(state, goal)
+
+        next_state, reward, done, _ = env.step(action)
+
+        # ゲームオーバーではなく，最大ステップ数に到達したことでエピソードが終了した場合は，
+        # 本来であればその先も試行が継続するはず．よって，終了シグナルをFalseにする．
+        # NOTE: ゲームオーバーによってエピソード終了した場合には， done_masked=True が適切．
+        # しかし，以下の実装では，"たまたま"最大ステップ数でゲームオーバーとなった場合には，
+        # done_masked=False になってしまう．
+        # その場合は稀で，多くの実装ではその誤差を無視しているので，今回も無視する．
+        if t == env._max_episode_steps:
+            done_masked = False
+        else:
+            done_masked = done
+
+        # リプレイバッファにデータを追加する．
+        self.buffer.append(state, action, reward, done_masked, next_state, goal)
+
+        # エピソードが終了した場合には，環境をリセットする．
+        if done:
+            t = 0
+            next_state = env.reset()
+
+        return next_state, t
+
+    def update(self):
+        self.learning_steps += 1
+        states, actions, rewards, dones, next_states, goals = self.buffer.sample(self.batch_size)
+
+        self.update_critic(states, actions, rewards, dones, next_states, goals)
+        self.update_actor(states, goals)
+        self.update_target()
+
+    def update_critic(self, states, actions, rewards, dones, next_states, goals):
+        states2 = torch.cat([states, goals], dim=-1)
+        curr_qs1, curr_qs2 = self.critic(states2, actions)
+
+        with torch.no_grad():
+            next_states2 = torch.cat([next_states, goals], dim=-1)
+            next_actions = self.actor(next_states2)
+            next_qs1, next_qs2 = self.critic_target(next_states2, next_actions)
+            next_qs = torch.min(next_qs1, next_qs2)
+        target_qs = rewards * self.reward_scale + (1.0 - dones) * self.gamma * next_qs
+
+        loss_critic1 = (curr_qs1 - target_qs).pow_(2).mean()
+        loss_critic2 = (curr_qs2 - target_qs).pow_(2).mean()
+
+        self.optim_critic.zero_grad()
+        (loss_critic1 + loss_critic2).backward(retain_graph=False)
+        self.optim_critic.step()
+
+    def update_actor(self, states, goals):
+        states2 = torch.cat([states, goals], dim=-1)
+        actions = self.actor(states2)
+        qs1, qs2 = self.critic(states2, actions)
+        loss_actor = -torch.min(qs1, qs2).mean()
+
+        self.optim_actor.zero_grad()
+        loss_actor.backward(retain_graph=False)
+        self.optim_actor.step()
+
+    def save(self, path="./"):
+        torch.save(self.actor.to('cpu').state_dict(), path+"GC_DDPG_actor.pth")
+        self.actor.to(self.device)
+
+        torch.save(self.critic.to('cpu').state_dict(), path+"GC_DDPG_critic.pth")
+        self.critic.to(self.device)
+
+    def load(self, path="./"):
+        self.actor.load_state_dict(torch.load(path+"GC_DDPG_actor.pth"))
+        self.critic.load_state_dict(torch.load(path+"GC_DDPG_critic.pth"))
 
 '''
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

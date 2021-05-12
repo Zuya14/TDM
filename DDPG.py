@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ReplayBuffer import ReplayBuffer
-import numpy as np
 import random
 
 # actorのネットワーク
@@ -63,18 +62,18 @@ class DDPG:
 
         # Actor-Criticのネットワークを構築する．
         self.actor = ActorNetwork(
-            state_size=state_size,
-            action_size=action_size,
+            state_size=state_size[0],
+            action_size=action_size[0],
             hidden_size=hidden_size
         ).to(device)
         self.critic = CriticNetwork(
-            state_size=state_size,
-            action_size=action_size,
+            state_size=state_size[0],
+            action_size=action_size[0],
             hidden_size=hidden_size
         ).to(device)
         self.critic_target = CriticNetwork(
-            state_size=state_size,
-            action_size=action_size,
+            state_size=state_size[0],
+            action_size=action_size[0],
             hidden_size=hidden_size
         ).to(device).eval()
 
@@ -107,18 +106,25 @@ class DDPG:
         # 学習初期の一定期間(start_steps)は学習しない．
         return steps >= max(self.start_steps, self.batch_size)
 
+    def exploit(self, state):
+        """ 決定論的な行動を返す． """
+        state = torch.tensor(state, dtype=torch.float, device=self.device).unsqueeze_(0)
+        with torch.no_grad():
+            action = self.actor(state)
+        return action.cpu().numpy()[0]
+
     def step(self, env, state, t, steps):
         t += 1
 
         # 学習初期の一定期間(start_steps)は，ランダムに行動して多様なデータの収集を促進する．
         if steps <= self.start_steps:
-            action = env.action_size.sample()
+            action = env.action_space.sample()
         else:
             if random.random() < self.epsilon_func(steps):
-                action = env.action_size.sample()
+                action = env.action_space.sample()
             else:
                 with torch.no_grad():
-                    action = self.actor(state)
+                    action = self.exploit(state)
 
         next_state, reward, done, _ = env.step(action)
 
@@ -182,13 +188,13 @@ class DDPG:
             t.data.add_(self.tau * s.data)
 
     def save(self, path="./"):
-        torch.save(self.actor.to('cpu').state_dict(), path+"actor.pth")
+        torch.save(self.actor.to('cpu').state_dict(), path+"DDPG_actor.pth")
         self.actor.to(self.device)
 
-        torch.save(self.critic.to('cpu').state_dict(), path+"critic.pth")
+        torch.save(self.critic.to('cpu').state_dict(), path+"DDPG_critic.pth")
         self.critic.to(self.device)
 
     def load(self, path="./"):
-        self.actor.load_state_dict(torch.load(path+"actor.pth"))
-        self.critic.load_state_dict(torch.load(path+"critic.pth"))
+        self.actor.load_state_dict(torch.load(path+"DDPG_actor.pth"))
+        self.critic.load_state_dict(torch.load(path+"DDPG_critic.pth"))
 

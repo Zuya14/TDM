@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<robot name="robot">
+    <link name="origin">]
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value=".0"/>
+            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+    </link>
+
+    <link name="base">
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value=".0"/>
+            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <!-- <visual>
+            <geometry>
+                <mesh filename="obj/pla-robot.obj" scale="1.0 1.0 1.0"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+            <material name="Blue1">
+                <color rgba="0.2 0.2 1 1" />
+            </material>
+        </visual> -->
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.5" radius="0.25"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- <link name="cam">
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value=".0"/>
+            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <box size="0.3 0.1 0.1"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <material name="Blue2">
+                <color rgba="0.5 0.5 1 1" />
+            </material>
+        </visual>
+    </link> -->
+
+    <joint name="origin_to_base" type="fixed">
+        <parent link="origin"/>
+        <child link="base"/>
+        <origin xyz="0 0 0.25"/>
+    </joint>
+
+    <!-- <joint name="origin_to_cam" type="fixed">
+        <parent link="origin"/>
+        <child link="cam"/>
+        <origin xyz="0 0.2 0.5" rpy="-0.5236 0 0"/>
+    </joint> -->
+</robot>
