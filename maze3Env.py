@@ -112,7 +112,8 @@ class maze3Env(gym.Env):
         # isArrive = self.sim.isArrive()
 
         rewardContact = -100.0 if isComtact else 0.0
-        rewardDistance = - np.linalg.norm(self.sim.observe() - self.sim.tgt_pos, ord=1)
+        # rewardDistance = - np.linalg.norm(self.sim.observe() - self.sim.tgt_pos, ord=1)
+        rewardDistance = - np.linalg.norm(self.sim.observe() - self.sim.tgt_pos, ord=2)
         # rewardArrive = 1.0 if isArrive else 0.0
 
         # rewardMove = 0.01 * (self.sim.old_distance - self.sim.distance) / self.sec
