@@ -11,11 +11,11 @@ from maze3Env import maze3Env
 
 # ENV_ID = 'InvertedPendulumBulletEnv-v0'
 SEED = 0
-# NUM_STEPS = 5 * 10 ** 4
+NUM_STEPS = 5 * 10 ** 4
 # NUM_STEPS = 10 * 10 ** 4
 # NUM_STEPS = 2 * 10 ** 5
 # NUM_STEPS = 25 * 10 ** 4
-NUM_STEPS = 1 * 10 ** 5
+# NUM_STEPS = 1 * 10 ** 5
 EVAL_INTERVAL = 10 ** 3
 
 # env = gym.make(ENV_ID)

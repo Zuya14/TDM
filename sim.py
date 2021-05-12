@@ -25,6 +25,7 @@ class sim:
         if clientReset:
             self.phisicsClient = bc.BulletClient(connection_mode=self.mode)
 
+        self.steps = 0
         self.sec = sec
 
         self.vx = vx
@@ -114,6 +115,7 @@ class sim:
 
         x, y = self.getState()[:2]
         self.distance = math.sqrt((x - 10.0)**2 + (y - 10.0)**2)
+        self.steps += 1
 
         return self.done
 

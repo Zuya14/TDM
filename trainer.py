@@ -131,7 +131,7 @@ class Trainer:
         del env
         return play_mp4()
 
-    def plot(self):
+    def plot(self, s=""):
         """ 平均収益のグラフを描画する． """
         fig = plt.figure(figsize=(8, 6))
         plt.plot(self.returns['step'], self.returns['return'])
@@ -142,18 +142,18 @@ class Trainer:
         plt.title('return', fontsize=24)
         plt.tight_layout()
         if self.is_GC:
-            fig.savefig("log/GC_DDPG.png")
+            fig.savefig("log/GC_DDPG"+s+".png")
         else:
-            fig.savefig("log/DDPG.png")
+            fig.savefig("log/DDPG"+s+".png")
 
     @property
     def time(self):
         """ 学習開始からの経過時間． """
         return str(timedelta(seconds=int(time() - self.start_time)))
 
-    def saveVideo(self, path="./"):   
+    def saveVideo(self, path="./", s=""):   
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')  
-        video = cv2.VideoWriter(path + ("GC_DDPG" if self.is_GC else "DDPG")  + ".mp4", fourcc, 10, (800,800))  # 動画の仕様（ファイル名、fourcc, FPS, サイズ）
+        video = cv2.VideoWriter(path + ("GC_DDPG" if self.is_GC else "DDPG")  + s + ".mp4", fourcc, 10, (800,800))  # 動画の仕様（ファイル名、fourcc, FPS, サイズ）
 
         done = False
         state = self.env.test_reset()

@@ -1,10 +1,10 @@
 from DDPG import DDPG, ActorNetwork, CriticNetwork
-from HindsightReplayBuffer import HindsightReplayBuffer_old
+from HindsightReplayBuffer import HindsightReplayBuffer, episode
 import torch
 import numpy as np
 import random
 
-class GC_DDPG(DDPG):
+class GC_DDPG_HER(DDPG):
 
     def __init__(self, state_size, action_size, goal_size, hidden_size=256, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                  batch_size=256, gamma=0.99, lr_actor=1e-3, lr_critic=1e-3,
@@ -27,11 +27,8 @@ class GC_DDPG(DDPG):
             epsilon_decay
         )
 
-        self.buffer = HindsightReplayBuffer_old(
+        self.buffer = HindsightReplayBuffer(
             buffer_size=replay_size,
-            state_size=state_size,
-            action_size=action_size,
-            goal_size=goal_size,
             device=device,
         )
 
@@ -60,6 +57,8 @@ class GC_DDPG(DDPG):
         # オプティマイザ．
         self.optim_actor = torch.optim.Adam(self.actor.parameters(), lr=lr_actor)
         self.optim_critic = torch.optim.Adam(self.critic.parameters(), lr=lr_critic)
+
+        self.episode = episode(device)
     
     def exploit(self, state, goal):
         """ 決定論的な行動を返す． """
@@ -95,18 +94,22 @@ class GC_DDPG(DDPG):
             done_masked = done
 
         # リプレイバッファにデータを追加する．
-        self.buffer.append(state, action, reward, done_masked, next_state, goal)
+        self.episode.append(state, action, reward, done_masked, env.sim.isContacts(), next_state, goal)
 
         # エピソードが終了した場合には，環境をリセットする．
         if done:
             t = 0
             next_state = env.reset()
 
+            self.buffer.append(self.episode, env)
+            self.episode = episode()
+
         return next_state, t
 
     def update(self):
         self.learning_steps += 1
         states, actions, rewards, dones, next_states, goals = self.buffer.sample(self.batch_size)
+        # states, actions, rewards, dones, collisions, next_states, goals = self.buffer.sample(self.batch_size)
 
         self.update_critic(states, actions, rewards, dones, next_states, goals)
         self.update_actor(states, goals)
@@ -141,15 +144,15 @@ class GC_DDPG(DDPG):
         self.optim_actor.step()
 
     def save(self, path="./"):
-        torch.save(self.actor.to('cpu').state_dict(), path+"GC_DDPG_actor.pth")
+        torch.save(self.actor.to('cpu').state_dict(), path+"GC_DDPG_HER_actor.pth")
         self.actor.to(self.device)
 
-        torch.save(self.critic.to('cpu').state_dict(), path+"GC_DDPG_critic.pth")
+        torch.save(self.critic.to('cpu').state_dict(), path+"GC_DDPG_HER_critic.pth")
         self.critic.to(self.device)
 
     def load(self, path="./"):
-        self.actor.load_state_dict(torch.load(path+"GC_DDPG_actor.pth"))
-        self.critic.load_state_dict(torch.load(path+"GC_DDPG_critic.pth"))
+        self.actor.load_state_dict(torch.load(path+"GC_DDPG_HER_actor.pth"))
+        self.critic.load_state_dict(torch.load(path+"GC_DDPG_HER_critic.pth"))
 
 '''
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

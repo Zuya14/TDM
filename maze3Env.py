@@ -55,7 +55,7 @@ class maze3Env(gym.Env):
             new_env.sim = self.sim.copy(_id)
 
         new_env.action_space = gym.spaces.Box(low=0.0, high=1.0, shape=(3,), dtype=np.float32)
-        new_env.lidar = new_env.createLidar()
+        # new_env.lidar = new_env.createLidar()
         # new_env.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=new_env.lidar.shape)
         # new_env.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(new_env.lidar.shape[0]+4,))
         self.observation_space = gym.spaces.Box(low=0.0, high=9.0, shape=(2,))
@@ -98,6 +98,8 @@ class maze3Env(gym.Env):
 
         reward = self.get_reward()
 
+        done = done or (self.sim.steps == self._max_episode_steps)
+
         return observation, reward, done, {}
 
     def observe(self):
@@ -108,17 +110,11 @@ class maze3Env(gym.Env):
     #     return self.sim.observe2d(self.lidar)
 
     def get_reward(self):
-        isComtact = self.sim.isContacts()
-        # isArrive = self.sim.isArrive()
+        return self.calc_reward(self.sim.isContacts(), self.sim.observe(), self.sim.tgt_pos)
 
-        rewardContact = -100.0 if isComtact else 0.0
-        # rewardDistance = - np.linalg.norm(self.sim.observe() - self.sim.tgt_pos, ord=1)
-        rewardDistance = - np.linalg.norm(self.sim.observe() - self.sim.tgt_pos, ord=2)
-        # rewardArrive = 1.0 if isArrive else 0.0
-
-        # rewardMove = 0.01 * (self.sim.old_distance - self.sim.distance) / self.sec
-        # rewardMove = 0.1 * (self.sim.old_distance - self.sim.distance) / self.sec
-        # reward = rewardContact + rewardArrive + rewardMove
+    def calc_reward(self, contact, pos, tgt_pos):
+        rewardContact = -100.0 if contact else 0.0
+        rewardDistance = - np.linalg.norm(pos - tgt_pos, ord=2)
         reward = rewardContact + rewardDistance
 
         return reward

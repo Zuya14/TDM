@@ -1,7 +1,116 @@
 import torch
 import numpy as np
 
+
+class episode:
+    def __init__(self, device):
+        self.states = []
+        self.actions = []
+        self.rewards = []
+        self.dones = []
+        self.collisions = []
+        self.next_states = []
+        self.goals = []
+
+        self.device=device
+
+    def append(self, state, action, reward, done, collision, next_state, goal):
+        # self.states.append(state)
+        # self.actions.append(action)
+        # self.rewards.append(reward)
+        # self.dones.append(done)
+        # self.collisions.append(collision)
+        # self.next_states.append(next_state)
+        # self.goals.append(goal)
+
+        self.states.append(torch.tensor(state))
+        self.actions.append(torch.tensor(action))
+        self.rewards.append(torch.tensor(reward))
+        self.dones.append(torch.tensor(done))
+        self.collisions.append(torch.tensor(collision))
+        self.next_states.append(torch.tensor(next_state))
+        self.goals.append(torch.tensor(goal))
+
+    def size(self):
+        return len(self.states)
+
+    def __call__(self):
+        return np.array([
+        self.states,
+        self.actions,
+        self.rewards,
+        self.dones,
+        self.collisions,
+        self.next_states,
+        self.goals
+        ], dtype=object)
+
+    def resample_goals(self, env, num_subgoals=4):
+        idxes = np.random.randint(low=0, high=self.size(), size=num_subgoals)
+
+        new_episodes = [self.recreate_episode(env, id) for id in idxes]
+
+        return new_episodes
+
+    def recreate_episode(self, env, id_subgoal):
+        new_episode = episode()
+        new_episode.states = self.states[:id_subgoal]
+        new_episode.actions = self.actions[:id_subgoal]
+        new_episode.dones = self.dones[:id_subgoal]
+        new_episode.collisions = self.collisions[:id_subgoal]
+        new_episode.next_states = self.next_states[:id_subgoal]
+        
+        goal = self.next_states[id_subgoal]
+        new_episode.goals = [goal] * id_subgoal
+
+        new_episode.rewards = [env.calc_reward(c, s, goal) for c, s in zip(new_episode.collisions, new_episode.states)]
+
+        return new_episode
+
 class HindsightReplayBuffer():
+
+    def __init__(self, buffer_size, device):
+        self.buffer_size = buffer_size
+        self.size = 0
+        self.device=device
+
+        self.episodes = []
+
+    def append(self, episode, env, num_subgoals=4):
+        self.size += episode.size()
+        self.episodes.append(episode())
+
+        for ep in episode.resample_goals(env, num_subgoals):
+            self.episodes.append(ep())
+
+        while self.size > self.buffer_size:
+            self.size -= self.episodes[0].size()
+            del self.episodes[0]
+
+    def extend(self, memory):
+        self.size += memory.size
+        self.episodes.extend(memory.episodes)
+
+        while self.size > self.buffer_size:
+            self.size -= self.episodes[0].size()
+            del self.episodes[0]
+
+    def flatten(self):
+        return np.concatenate(self.episodes, -1)
+
+    def sample(self, batch_size):
+        idxes = np.random.randint(low=0, high=self.size, size=batch_size)
+        flatten_episodes = self.flatten()
+        return [
+            torch.stack([torch.tensor(data, dtype=torch.float, device=self.device) for data in flatten_episodes[0, idxes]]),
+            torch.stack([torch.tensor(data, dtype=torch.float, device=self.device) for data in flatten_episodes[1, idxes]]),
+            torch.stack([torch.tensor(data, dtype=torch.float, device=self.device) for data in flatten_episodes[2, idxes]]),
+            torch.stack([torch.tensor(data, dtype=torch.float , device=self.device) for data in flatten_episodes[3, idxes]]),
+            torch.stack([torch.tensor(data, dtype=torch.float, device=self.device) for data in flatten_episodes[5, idxes]]),
+            torch.stack([torch.tensor(data, dtype=torch.float, device=self.device) for data in flatten_episodes[6, idxes]]),
+            ]
+
+class HindsightReplayBuffer_old():
 
     def __init__(self, buffer_size, state_size, action_size, goal_size, device):
         # 次にデータを挿入するインデックス．
