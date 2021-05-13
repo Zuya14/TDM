@@ -29,7 +29,10 @@ class GC_DDPG_HER(DDPG):
 
         self.buffer = HindsightReplayBuffer(
             buffer_size=replay_size,
-            device=device,
+            state_size=state_size,
+            action_size=action_size,
+            goal_size=goal_size,
+            device=device
         )
 
         # Actor-Criticのネットワークを構築する．
@@ -58,7 +61,7 @@ class GC_DDPG_HER(DDPG):
         self.optim_actor = torch.optim.Adam(self.actor.parameters(), lr=lr_actor)
         self.optim_critic = torch.optim.Adam(self.critic.parameters(), lr=lr_critic)
 
-        self.episode = episode(device)
+        self.device = device
     
     def exploit(self, state, goal):
         """ 決定論的な行動を返す． """
@@ -94,15 +97,14 @@ class GC_DDPG_HER(DDPG):
             done_masked = done
 
         # リプレイバッファにデータを追加する．
-        self.episode.append(state, action, reward, done_masked, env.sim.isContacts(), next_state, goal)
+        self.buffer.append(state, action, reward, done_masked, next_state, goal, env.sim.isContacts())
 
         # エピソードが終了した場合には，環境をリセットする．
         if done:
             t = 0
             next_state = env.reset()
 
-            self.buffer.append(self.episode, env)
-            self.episode = episode()
+            self.buffer.resample_goals(env)
 
         return next_state, t
 

@@ -54,7 +54,7 @@ class maze3Env(gym.Env):
         else:
             new_env.sim = self.sim.copy(_id)
 
-        new_env.action_space = gym.spaces.Box(low=0.0, high=1.0, shape=(3,), dtype=np.float32)
+        new_env.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(3,), dtype=np.float32)
         # new_env.lidar = new_env.createLidar()
         # new_env.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=new_env.lidar.shape)
         # new_env.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(new_env.lidar.shape[0]+4,))
@@ -113,9 +113,13 @@ class maze3Env(gym.Env):
         return self.calc_reward(self.sim.isContacts(), self.sim.observe(), self.sim.tgt_pos)
 
     def calc_reward(self, contact, pos, tgt_pos):
-        rewardContact = -100.0 if contact else 0.0
-        rewardDistance = - np.linalg.norm(pos - tgt_pos, ord=2)
+        # rewardContact = -100.0 if contact else 0.0
+        rewardContact = -1.0 if contact else 0.0
+        # rewardDistance = - np.linalg.norm(pos - tgt_pos, ord=2)
+        # rewardDistance = 1.0 if np.linalg.norm(pos - tgt_pos, ord=2) < 0.1 else 0.0
+        rewardDistance = 0.0 if np.linalg.norm(pos - tgt_pos, ord=2) < 0.1 else -1.0
         reward = rewardContact + rewardDistance
+        # reward = rewardDistance
 
         return reward
 
