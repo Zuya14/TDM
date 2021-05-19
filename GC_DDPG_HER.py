@@ -6,7 +6,7 @@ import random
 
 class GC_DDPG_HER(DDPG):
 
-    def __init__(self, state_size, action_size, goal_size, hidden_size=256, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+    def __init__(self, state_size, action_size, goal_size, hidden_size=64, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                  batch_size=256, gamma=0.99, lr_actor=1e-3, lr_critic=1e-3,
                  replay_size=10**6, start_steps=10**4, tau=5e-3, alpha=0.2, reward_scale=1.0, epsilon_decay = 50000):
 
@@ -26,6 +26,8 @@ class GC_DDPG_HER(DDPG):
             reward_scale,
             epsilon_decay
         )
+
+        self.name = 'GC_DDPG_HER'
 
         self.buffer = HindsightReplayBuffer(
             buffer_size=replay_size,
@@ -66,6 +68,7 @@ class GC_DDPG_HER(DDPG):
     def exploit(self, state, goal):
         """ 決定論的な行動を返す． """
         state = torch.tensor(np.concatenate([state, goal]), dtype=torch.float, device=self.device).unsqueeze_(0)
+        # state = torch.tensor(np.concatenate([state, goal-state]), dtype=torch.float, device=self.device).unsqueeze_(0)
         with torch.no_grad():
             action = self.actor(state)
         return action.cpu().numpy()[0]
@@ -119,10 +122,12 @@ class GC_DDPG_HER(DDPG):
 
     def update_critic(self, states, actions, rewards, dones, next_states, goals):
         states2 = torch.cat([states, goals], dim=-1)
+        # states2 = torch.cat([states, goals-states], dim=-1)
         curr_qs1, curr_qs2 = self.critic(states2, actions)
 
         with torch.no_grad():
             next_states2 = torch.cat([next_states, goals], dim=-1)
+            # next_states2 = torch.cat([next_states, goals-next_states], dim=-1)
             next_actions = self.actor(next_states2)
             next_qs1, next_qs2 = self.critic_target(next_states2, next_actions)
             next_qs = torch.min(next_qs1, next_qs2)
@@ -137,6 +142,7 @@ class GC_DDPG_HER(DDPG):
 
     def update_actor(self, states, goals):
         states2 = torch.cat([states, goals], dim=-1)
+        # states2 = torch.cat([states, goals-states], dim=-1)
         actions = self.actor(states2)
         qs1, qs2 = self.critic(states2, actions)
         loss_actor = -torch.min(qs1, qs2).mean()

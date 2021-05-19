@@ -6,8 +6,8 @@ from trainer import Trainer
 
 # from mazeEnv import mazeEnv 
 # from crossEnv import crossEnv 
-# from squareEnv import squareEnv 
-from maze3Env import maze3Env 
+from square3Env import square3Env 
+# from maze3Env import maze3Env 
 
 # ENV_ID = 'InvertedPendulumBulletEnv-v0'
 SEED = 0
@@ -23,20 +23,21 @@ EVAL_INTERVAL = 10 ** 3
 
 # env = mazeEnv()
 # env = crossEnv()
-# env = squareEnv()
-env = maze3Env()
+env = square3Env()
+# env = maze3Env()
 env.setting()
 
 # env_test = mazeEnv()
 # env_test = crossEnv()
-# env_test = squareEnv()
-env_test = maze3Env()
+env_test = square3Env()
+# env_test = maze3Env()
 env_test.setting()
 
 algo = DDPG(
     state_size=env.observation_space.shape,
     action_size=env.action_space.shape,
-    epsilon_decay = NUM_STEPS
+    epsilon_decay = NUM_STEPS,
+    start_steps=1000
 )
 
 trainer = Trainer(

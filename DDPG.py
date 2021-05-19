@@ -6,7 +6,7 @@ import random
 
 # actorのネットワーク
 class ActorNetwork(nn.Module):
-    def __init__(self, state_size, action_size, hidden_size=256):
+    def __init__(self, state_size, action_size, hidden_size=64):
         super().__init__()
 
         self.net = nn.Sequential(
@@ -22,7 +22,7 @@ class ActorNetwork(nn.Module):
 
 # criticのネットワーク（状態と行動を入力にしてQ値を出力）
 class CriticNetwork(nn.Module):
-    def __init__(self, state_size, action_size, hidden_size=256):
+    def __init__(self, state_size, action_size, hidden_size=64):
         super().__init__()
 
         self.net1 = nn.Sequential(
@@ -46,11 +46,13 @@ class CriticNetwork(nn.Module):
 
 class DDPG:
 
-    def __init__(self, state_size, action_size, hidden_size=256, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+    def __init__(self, state_size, action_size, hidden_size=64, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                  batch_size=256, gamma=0.99, lr_actor=1e-3, lr_critic=1e-3,
                  replay_size=10**6, start_steps=10**4, tau=5e-3, alpha=0.2, reward_scale=1.0, epsilon_decay = 50000):
 
         super().__init__()
+
+        self.name = 'DDPG'
 
         # リプレイバッファ．
         self.buffer = ReplayBuffer(

@@ -110,6 +110,7 @@ class Trainer:
 
         print(f'Num steps: {steps:<6}   '
               f'Return: {mean_return:<5.1f}   '
+              f'Final state: {state}   '
               f'Time: {self.time}')
 
     def visualize(self):
@@ -141,10 +142,7 @@ class Trainer:
         # plt.title(f'{self.env.unwrapped.spec.id}', fontsize=24)
         plt.title('return', fontsize=24)
         plt.tight_layout()
-        if self.is_GC:
-            fig.savefig("log/GC_DDPG"+s+".png")
-        else:
-            fig.savefig("log/DDPG"+s+".png")
+        fig.savefig("log/"+self.algo.name+s+".png")
 
     @property
     def time(self):
@@ -153,7 +151,7 @@ class Trainer:
 
     def saveVideo(self, path="./", s=""):   
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')  
-        video = cv2.VideoWriter(path + ("GC_DDPG" if self.is_GC else "DDPG")  + s + ".mp4", fourcc, 10, (800,800))  # 動画の仕様（ファイル名、fourcc, FPS, サイズ）
+        video = cv2.VideoWriter(path + self.algo.name + s + ".mp4", fourcc, 10, (800,800))  # 動画の仕様（ファイル名、fourcc, FPS, サイズ）
 
         done = False
         state = self.env.test_reset()

@@ -139,26 +139,30 @@ class HindsightReplayBuffer():
         self._n = min(self._n + 1, self.buffer_size)
 
     def sample(self, batch_size):
-        idxes = np.random.randint(low=0, high=self._n, size=batch_size)
+        indices = np.random.randint(low=0, high=self._n, size=batch_size)
         return (
-            self.states[idxes],
-            self.actions[idxes],
-            self.rewards[idxes],
-            self.dones[idxes],
-            self.next_states[idxes],
-            self.goals[idxes]
+            self.states[indices],
+            self.actions[indices],
+            self.rewards[indices],
+            self.dones[indices],
+            self.next_states[indices],
+            self.goals[indices]
         )
 
     def resample_goals(self, env):
-
-        idxes = np.random.randint(low=0, high=self.episode.size(), size=self.num_subgoals)
         states, actions, rewards, dones, next_states, goals, collisions = self.episode()
+        episode_len = self.episode.size()
+        
+        for i in range(episode_len-1):
+            indices = np.random.randint(low=i, high=episode_len-1, size=self.num_subgoals)
 
-        for i in idxes:
-            new_goal = next_states[i]
-            [self.append(states[j], actions[j], env.calc_reward(collisions[j], states[j], new_goal), dones[j], next_states[j], new_goal, collisions[j], False) for j in range(i)]
+            for index in indices:
+                new_goal = next_states[index]
+                if not collisions[i]:
+                    self.append(states[i], actions[i], env.calc_reward(collisions[i], states[i], new_goal), dones[i], next_states[i], new_goal, collisions[i], False)
 
         self.episode = episode()
+
 
 
 
