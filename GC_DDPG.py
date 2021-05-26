@@ -65,8 +65,8 @@ class GC_DDPG(DDPG):
     
     def exploit(self, state, goal):
         """ 決定論的な行動を返す． """
-        state = torch.tensor(np.concatenate([state, goal]), dtype=torch.float, device=self.device).unsqueeze_(0)
-        # state = torch.tensor(np.concatenate([state, goal-state]), dtype=torch.float, device=self.device).unsqueeze_(0)
+        # state = torch.tensor(np.concatenate([state, goal]), dtype=torch.float, device=self.device).unsqueeze_(0)
+        state = torch.tensor(np.concatenate([state, goal-state]), dtype=torch.float, device=self.device).unsqueeze_(0)
         with torch.no_grad():
             action = self.actor(state)
         return action.cpu().numpy()[0]
@@ -116,13 +116,13 @@ class GC_DDPG(DDPG):
         self.update_target()
 
     def update_critic(self, states, actions, rewards, dones, next_states, goals):
-        states2 = torch.cat([states, goals], dim=-1)
-        # states2 = torch.cat([states, goals-states], dim=-1)
+        # states2 = torch.cat([states, goals], dim=-1)
+        states2 = torch.cat([states, goals-states], dim=-1)
         curr_qs1, curr_qs2 = self.critic(states2, actions)
 
         with torch.no_grad():
-            next_states2 = torch.cat([next_states, goals], dim=-1)
-            # next_states2 = torch.cat([next_states, goals-next_states], dim=-1)
+            # next_states2 = torch.cat([next_states, goals], dim=-1)
+            next_states2 = torch.cat([next_states, goals-next_states], dim=-1)
             next_actions = self.actor(next_states2)
             next_qs1, next_qs2 = self.critic_target(next_states2, next_actions)
             next_qs = torch.min(next_qs1, next_qs2)
@@ -136,8 +136,8 @@ class GC_DDPG(DDPG):
         self.optim_critic.step()
 
     def update_actor(self, states, goals):
-        states2 = torch.cat([states, goals], dim=-1)
-        # states2 = torch.cat([states, goals-states], dim=-1)
+        # states2 = torch.cat([states, goals], dim=-1)
+        states2 = torch.cat([states, goals-states], dim=-1)
         actions = self.actor(states2)
         qs1, qs2 = self.critic(states2, actions)
         loss_actor = -torch.min(qs1, qs2).mean()

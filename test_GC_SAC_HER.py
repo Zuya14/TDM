@@ -49,4 +49,4 @@ trainer = Trainer(
 
 algo.load()
 
-trainer.saveVideo(s="_HER")
+trainer.saveVideo()

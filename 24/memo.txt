@@ -1,0 +1,3 @@
+init random pos
+tgt random
+rewardContact = -100.0

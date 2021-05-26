@@ -168,8 +168,6 @@ class GC_SAC_HER(DDPG):
             t = 0
             next_state = env.reset()
 
-            self.buffer.resample_goals(env)
-
         return next_state, t
 
     def update(self):

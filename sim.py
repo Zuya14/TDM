@@ -177,9 +177,9 @@ class sim:
     def isContacts(self):
         return len(self.contacts()) > 0
 
-    def isArrive(self):
-        return self.distance < 0.5
-        # return self.distance < 0.1
+    # def isArrive(self):
+    #     return self.distance < 0.5
+    #     # return self.distance < 0.1
 
     def isDone(self):
         return self.done
@@ -218,16 +218,16 @@ class sim_maze3(sim):
 
         super().reset(x=init_pos[0], y=init_pos[1], sec=sec)
 
-        tgt_pos = np.random.rand(2) * 8.5
-        tgt_pos = tgt_pos + 0.25 
+        # tgt_pos = np.random.rand(2) * 8.5
+        # tgt_pos = tgt_pos + 0.25 
 
-        while onRect(tgt_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]) or math.sqrt((init_pos[0] - tgt_pos[0])**2 + (init_pos[1] - tgt_pos[1])**2) < 1.0:
-            tgt_pos = np.random.rand(2) * 8.5
-            tgt_pos = tgt_pos + 0.25 
+        # while onRect(tgt_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]) or math.sqrt((init_pos[0] - tgt_pos[0])**2 + (init_pos[1] - tgt_pos[1])**2) < 1.0:
+        #     tgt_pos = np.random.rand(2) * 8.5
+        #     tgt_pos = tgt_pos + 0.25 
 
-        self.tgt_pos = tgt_pos
+        # self.tgt_pos = tgt_pos
 
-        # self.tgt_pos = np.array(tgtpos)
+        self.tgt_pos = np.array(tgtpos)
 
         x, y = self.getState()[:2]
         # self.distance = math.sqrt((x - self.tgt_pos[0])**2 + (y - self.tgt_pos[1])**2)
@@ -246,6 +246,7 @@ class sim_maze3(sim):
 
     def isArrive(self, tgt_pos, pos):
         return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
+        # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
 
     def step(self, action):
 
@@ -263,9 +264,15 @@ class sim_maze3(sim):
             # self.vx = v * cos
             # self.vy = v * sin
 
-            self.vx = action[0]
+            # self.vx = action[0]
             # self.vy = action[1]
-            self.vy = 0
+            # self.vy = 0
+
+            scale = math.sqrt(action[0]**2 + action[1]**2)
+            if scale < 1.0:
+                scale = 1.0
+            self.vx = action[0] / scale
+            self.vy = action[1] / scale
 
             self.w = 0
 
@@ -374,17 +381,17 @@ class sim_square3(sim_maze3):
 
     def reset(self, sec, tgtpos=[7.0, 1.5]):
         super().reset(sec=sec)
-        init_pos = np.array([1.5, 1.5])
-        # init_pos = np.random.rand(2) * 8.5
-        # init_pos = init_pos + 0.25 
+        # init_pos = np.array([1.5, 1.5])
+        init_pos = np.random.rand(2) * 8.5
+        init_pos = init_pos + 0.25 
 
 
-        # tgt_pos = np.random.rand(2) * 8.5
-        # tgt_pos = tgt_pos + 0.25 
+        tgt_pos = np.random.rand(2) * 8.5
+        tgt_pos = tgt_pos + 0.25 
 
-        # self.tgt_pos = tgt_pos
+        self.tgt_pos = tgt_pos
 
-        self.tgt_pos = np.array(tgtpos)
+        # self.tgt_pos = np.array(tgtpos)
 
         x, y = self.getState()[:2]
         # self.distance = math.sqrt((x - self.tgt_pos[0])**2 + (y - self.tgt_pos[1])**2)

@@ -83,7 +83,7 @@ class Trainer:
         for _ in range(self.num_eval_episodes):
             # state = self.env_test.reset()
             state = self.env_test.test_reset()
-            goal = self.env.sim.tgt_pos
+            goal = self.env_test.sim.tgt_pos
             done = False
             episode_return = 0.0
 

@@ -32,8 +32,8 @@ class square3Env(gym.Env):
             self.sim = sim.sim_square3(_id, mode, sec)
 
         # self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(3,), dtype=np.float32)
-        # self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-        self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
+        self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        # self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
 
         # self.lidar = self.createLidar()
 
@@ -43,7 +43,9 @@ class square3Env(gym.Env):
 
         self.sec = sec
 
-        self._max_episode_steps = 1000
+        # self._max_episode_steps = 1000
+        # self._max_episode_steps = 200
+        self._max_episode_steps = 250
 
         self.reset()
 
@@ -117,13 +119,15 @@ class square3Env(gym.Env):
     def calc_reward(self, contact, pos, tgt_pos):
         # rewardContact = -100.0 if contact else 0.0
         rewardContact = -100.0 if contact else 0.0
+        # rewardContact = -10.0 if contact else 0.0
+        # rewardContact = -50.0 if contact else 0.0
         # rewardContact = 0.0
         # rewardDistance = - np.linalg.norm(pos - tgt_pos, ord=2)
         # rewardDistance = 1.0 if np.linalg.norm(pos - tgt_pos, ord=2) < 0.1 else 0.0
         # rewardDistance = 0.0 if (not contact) and (np.linalg.norm(pos - tgt_pos, ord=2) < 0.1) else -1.0
         # rewardDistance = 1.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else 0.0
-        rewardDistance = 0.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else -1.0
-        # rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=2)
+        # rewardDistance = 0.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else -1.0
+        rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=2)
         reward = rewardContact + rewardDistance
         # reward = rewardDistance
 

@@ -11,9 +11,9 @@ class ActorNetwork(nn.Module):
 
         self.net = nn.Sequential(
             nn.Linear(state_size, hidden_size),
-            nn.ReLU(inplace=True),
+            nn.ELU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(inplace=True),
+            nn.ELU(inplace=True),
             nn.Linear(hidden_size, action_size),
         )
 
@@ -27,16 +27,16 @@ class CriticNetwork(nn.Module):
 
         self.net1 = nn.Sequential(
             nn.Linear(state_size + action_size, hidden_size),
-            nn.ReLU(inplace=True),
+            nn.ELU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(inplace=True),
+            nn.ELU(inplace=True),
             nn.Linear(hidden_size, 1),
         )
         self.net2 = nn.Sequential(
             nn.Linear(state_size + action_size, hidden_size),
-            nn.ReLU(inplace=True),
+            nn.ELU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(inplace=True),
+            nn.ELU(inplace=True),
             nn.Linear(hidden_size, 1),
         )
 
@@ -61,7 +61,7 @@ class DDPG:
             action_size=action_size,
             device=device,
         )
-
+        print(state_size, action_size)
         # Actor-Criticのネットワークを構築する．
         self.actor = ActorNetwork(
             state_size=state_size[0],

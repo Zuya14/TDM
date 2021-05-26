@@ -159,7 +159,7 @@ class HindsightReplayBuffer():
             for index in indices:
                 new_goal = next_states[index]
                 if not collisions[i]:
-                    self.append(states[i], actions[i], env.calc_reward(collisions[i], states[i], new_goal), dones[i], next_states[i], new_goal, collisions[i], False)
+                    self.append(states[i], actions[i], env.calc_reward(collisions[i], states[i], new_goal), dones[i] or env.sim.isArrive(new_goal, next_states[i]), next_states[i], new_goal, collisions[i], False)
 
         self.episode = episode()
 

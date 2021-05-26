@@ -1,0 +1,7 @@
+init random pos
+tgt fixed
+rewardContact = -10.0
+
+max_episode = 200
+
+HER change done 

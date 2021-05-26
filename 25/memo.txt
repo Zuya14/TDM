@@ -1,0 +1,9 @@
+init random pos
+tgt random
+rewardContact = -100.0
+
+NUM_STEPS = 10 * 10 ** 4
+
+SAC
+NUM_STEPS = 5 * 10 ** 4
+
