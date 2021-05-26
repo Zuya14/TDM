@@ -245,8 +245,9 @@ class sim_maze3(sim):
         # self.old_distance = self.distance
 
     def isArrive(self, tgt_pos, pos):
-        return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
-        # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
+        # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
+        # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
+        return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
 
     def step(self, action):
 

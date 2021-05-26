@@ -42,7 +42,8 @@ class maze3Env(gym.Env):
 
         self.sec = sec
 
-        self._max_episode_steps = 1000
+        # self._max_episode_steps = 1000
+        self._max_episode_steps = 250
 
         self.reset()
 
@@ -114,11 +115,11 @@ class maze3Env(gym.Env):
         return self.calc_reward(self.sim.isContacts(), self.sim.observe(), self.sim.tgt_pos)
 
     def calc_reward(self, contact, pos, tgt_pos):
+        # rewardContact = -1000.0 if contact else 0.0
         # rewardContact = -100.0 if contact else 0.0
-        rewardContact = -100.0 if contact else 0.0
         # rewardContact = -10.0 if contact else 0.0
         # rewardContact = -50.0 if contact else 0.0
-        # rewardContact = 0.0
+        rewardContact = 0.0
         # rewardDistance = - np.linalg.norm(pos - tgt_pos, ord=2)
         # rewardDistance = 1.0 if np.linalg.norm(pos - tgt_pos, ord=2) < 0.1 else 0.0
         # rewardDistance = 0.0 if (not contact) and (np.linalg.norm(pos - tgt_pos, ord=2) < 0.1) else -1.0
