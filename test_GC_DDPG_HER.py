@@ -22,14 +22,14 @@ EVAL_INTERVAL = 10 ** 3
 
 # env = mazeEnv()
 # env = crossEnv()
-env = square3Env()
-# env = maze3Env()
+# env = square3Env()
+env = maze3Env()
 env.setting()
 
 # env_test = mazeEnv()
 # env_test = crossEnv()
-env_test = square3Env()
-# env_test = maze3Env()
+# env_test = square3Env()
+env_test = maze3Env()
 env_test.setting()
 
 algo = GC_DDPG_HER(
@@ -49,4 +49,4 @@ trainer = Trainer(
 
 algo.load()
 
-trainer.saveVideo(s="_HER")
+trainer.saveVideo()

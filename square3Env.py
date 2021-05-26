@@ -126,8 +126,8 @@ class square3Env(gym.Env):
         # rewardDistance = 1.0 if np.linalg.norm(pos - tgt_pos, ord=2) < 0.1 else 0.0
         # rewardDistance = 0.0 if (not contact) and (np.linalg.norm(pos - tgt_pos, ord=2) < 0.1) else -1.0
         # rewardDistance = 1.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else 0.0
-        # rewardDistance = 0.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else -1.0
-        rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=2)
+        rewardDistance = 0.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else -1.0
+        # rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=2)
         reward = rewardContact + rewardDistance
         # reward = rewardDistance
 

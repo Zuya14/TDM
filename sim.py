@@ -208,13 +208,13 @@ class sim_maze3(sim):
             self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(  5,  i, 0))]
 
     def reset(self, sec, tgtpos=[7.0, 1.5]):
-        init_pos = np.array([1.5, 1.5])
-        # init_pos = np.random.rand(2) * 8.5
-        # init_pos = init_pos + 0.25 
+        # init_pos = np.array([1.5, 1.5])
+        init_pos = np.random.rand(2) * 8.5
+        init_pos = init_pos + 0.25 
 
-        # while onRect(init_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]):
-        #     init_pos = np.random.rand(2) * 8.5
-        #     init_pos = init_pos + 0.25 
+        while onRect(init_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]):
+            init_pos = np.random.rand(2) * 8.5
+            init_pos = init_pos + 0.25 
 
         super().reset(x=init_pos[0], y=init_pos[1], sec=sec)
 
