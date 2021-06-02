@@ -1,6 +1,6 @@
 init random pos
 tgt fixed
-rewardContact = -1000.0
+rewardContact = 0.0
 
 max_episode = 250
 
@@ -8,7 +8,7 @@ HER change done
 
 ELU
 
-Contact < 0.1
+Contact < 0.5
 
 action scale
 

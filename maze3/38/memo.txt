@@ -1,8 +1,8 @@
 init random pos
 tgt fixed
-rewardContact = -100.0
+rewardContact = -1000.0
 
-max_episode = 500
+max_episode = 250
 
 HER change done 
 
@@ -12,7 +12,4 @@ Contact < 0.1
 
 action scale
 
-L1 norm
-
-NUM_STEPS = 10 * 10 ** 4
-STARTSTEPS = 3000
+L1 loss
