@@ -12,14 +12,17 @@ from maze3Env import maze3Env
 # ENV_ID = 'InvertedPendulumBulletEnv-v0'
 SEED = 0
 # NUM_STEPS = 5 * 10 ** 4
-NUM_STEPS = 3 * 10 ** 4
+# NUM_STEPS = 3 * 10 ** 4
 # NUM_STEPS = 5 * 10 ** 4
-# NUM_STEPS = 10 * 10 ** 4
+NUM_STEPS = 10 * 10 ** 4
 # NUM_STEPS = 2 * 10 ** 5
 # NUM_STEPS = 25 * 10 ** 4
 # NUM_STEPS = 1 * 10 ** 5
 # NUM_STEPS = 3 * 10 ** 5
 EVAL_INTERVAL = 10 ** 3
+
+# STARTSTEPS = 1000
+STARTSTEPS = 3000
 
 # env = gym.make(ENV_ID)
 # env_test = gym.make(ENV_ID)
@@ -41,7 +44,7 @@ algo = GC_DDPG_HER(
     action_size=env.action_space.shape,
     goal_size = env.observation_space.shape,
     epsilon_decay = NUM_STEPS,
-    start_steps=1000
+    start_steps=STARTSTEPS
 )
 
 trainer = Trainer(

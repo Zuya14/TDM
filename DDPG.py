@@ -4,6 +4,11 @@ import torch.nn.functional as F
 from ReplayBuffer import ReplayBuffer
 import random
 
+def fanin_init(size, fanin=None):
+    fanin = fanin or size[0]
+    v = 1. / np.sqrt(fanin)
+    return torch.Tensor(size).uniform_(-v, v)
+
 # actorのネットワーク
 class ActorNetwork(nn.Module):
     def __init__(self, state_size, action_size, hidden_size=64):
@@ -20,25 +25,77 @@ class ActorNetwork(nn.Module):
     def forward(self, states):
         return torch.tanh(self.net(states))
 
+    # def __init__(self, state_size, action_size, hidden_size=64):
+    #     super().__init__()
+    #     self.num_hidden_layers = hidden_size
+    #     self.input = state_size
+    #     self.output_action = action_size
+    #     self.init_w = 3e-3
+
+    #     #Dense Block
+    #     self.dense_1 = nn.Linear(self.input, self.num_hidden_layers)
+    #     self.relu1 = nn.ReLU(inplace=True)
+    #     self.dense_2 = nn.Linear(self.num_hidden_layers, self.num_hidden_layers)
+    #     self.relu2 = nn.ReLU(inplace=True)
+    #     self.output = nn.Linear(self.num_hidden_layers, self.output_action)
+    #     self.tanh = nn.Tanh()
+
+    # def init_weights(self, init_w):
+    #     self.dense_1.weight.data = fanin_init(self.dense_1.weight.data.size())
+    #     self.dense_2.weight.data = fanin_init(self.dense_2.weight.data.size())
+    #     self.output.weight.data.uniform_(-init_w, init_w)
+
+    # def forward(self, states):
+    #     x = self.dense_1(states)
+    #     x = self.relu1(x)
+    #     x = self.dense_2(x)
+    #     x = self.relu2(x)
+    #     output = self.output(x)
+    #     output = self.tanh(output)
+    #     return output
+
+class CNet(nn.Module):
+
+    def __init__(self, state_size, action_size, hidden_size=64):
+        super().__init__()
+
+        self.fc1     = nn.Linear(state_size + action_size, hidden_size)
+        self.fc2     = nn.Linear(hidden_size, hidden_size)
+        self.fc3_adv = nn.Linear(hidden_size, action_size)
+        self.fc3_v   = nn.Linear(hidden_size, 1)
+
+        self.fn = nn.ELU(inplace=True)
+
+    def forward(self, x):
+        h1 = self.fn(self.fc1(x))
+        h2 = self.fn(self.fc2(h1))
+        adv = self.fc3_adv(h2)
+        val = self.fc3_v(h2).expand(-1, adv.size(1))
+        output = val + adv - adv.mean(1, keepdim=True).expand(-1, adv.size(1))
+
+        return output
+
 # criticのネットワーク（状態と行動を入力にしてQ値を出力）
 class CriticNetwork(nn.Module):
     def __init__(self, state_size, action_size, hidden_size=64):
         super().__init__()
 
-        self.net1 = nn.Sequential(
-            nn.Linear(state_size + action_size, hidden_size),
-            nn.ELU(inplace=True),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ELU(inplace=True),
-            nn.Linear(hidden_size, 1),
-        )
-        self.net2 = nn.Sequential(
-            nn.Linear(state_size + action_size, hidden_size),
-            nn.ELU(inplace=True),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ELU(inplace=True),
-            nn.Linear(hidden_size, 1),
-        )
+        # self.net1 = nn.Sequential(
+        #     nn.Linear(state_size + action_size, hidden_size),
+        #     nn.ELU(inplace=True),
+        #     nn.Linear(hidden_size, hidden_size),
+        #     nn.ELU(inplace=True),
+        #     nn.Linear(hidden_size, 1),
+        # )
+        # self.net2 = nn.Sequential(
+        #     nn.Linear(state_size + action_size, hidden_size),
+        #     nn.ELU(inplace=True),
+        #     nn.Linear(hidden_size, hidden_size),
+        #     nn.ELU(inplace=True),
+        #     nn.Linear(hidden_size, 1),
+        # )
+        self.net1 = CNet(state_size, action_size, hidden_size)
+        self.net2 = CNet(state_size, action_size, hidden_size)
 
     def forward(self, states, actions):
         x = torch.cat([states, actions], dim=-1)
