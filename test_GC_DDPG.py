@@ -8,6 +8,7 @@ from trainer import Trainer
 # from crossEnv import crossEnv 
 from square3Env import square3Env 
 from maze3Env import maze3Env 
+import numpy as np
 
 # ENV_ID = 'InvertedPendulumBulletEnv-v0'
 SEED = 0
@@ -50,3 +51,26 @@ trainer = Trainer(
 algo.load()
 
 trainer.saveVideo()
+
+subgoals = np.array(
+    [
+        [1.5, 4.5],
+        [1.5, 7.5],
+        [4.5, 7.5],
+        [7.5, 7.5],
+        [7.5, 4.5],
+        [7.5, 1.5]
+    ]
+)
+
+trainer.saveVideo_subgoals(subgoals=subgoals, s="_subgoals")
+
+subgoals = np.array(
+    [
+        [1.5, 7.5],
+        [7.5, 7.5],
+        [7.5, 1.5]
+    ]
+)
+
+trainer.saveVideo_subgoals(subgoals=subgoals, s="_subgoals2")

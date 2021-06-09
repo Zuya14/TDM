@@ -168,3 +168,38 @@ class Trainer:
             video.write(self.env.render())
             if done:
                 break
+
+    def saveVideo_subgoals(self, subgoals, path="./", s=""):   
+        fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')  
+        video = cv2.VideoWriter(path + self.algo.name + s + ".mp4", fourcc, 10, (800,800))  # 動画の仕様（ファイル名、fourcc, FPS, サイズ）
+
+        done = False
+        state = self.env.test_reset()
+        # goal = self.env.sim.tgt_pos
+
+        # video.write(self.env.render())
+        video.write(self.env.sim.render(subgoals[0]))
+
+        i = 0
+        goal = subgoals[i]
+
+        for _ in range(self.env._max_episode_steps):
+
+            if self.is_GC:
+                action = self.algo.exploit(state, goal)
+            else:
+                action = self.algo.exploit(state)
+            state, _, done, _ = self.env.step(action)
+            # video.write(self.env.render())
+            video.write(self.env.sim.render(goal))
+            
+            if i < len(subgoals):
+                if self.env.sim.isArrive(goal, state):
+                    i += 1
+                    if len(subgoals) == i:
+                        goal = self.env.sim.tgt_pos
+                    else:
+                        goal = subgoals[i]
+
+            if done:
+                break

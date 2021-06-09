@@ -21,6 +21,9 @@ NUM_STEPS = 10 * 10 ** 4
 # NUM_STEPS = 3 * 10 ** 5
 EVAL_INTERVAL = 10 ** 3
 
+# STARTSTEPS = 1000
+STARTSTEPS = 3000
+
 # env = gym.make(ENV_ID)
 # env_test = gym.make(ENV_ID)
 
@@ -41,7 +44,7 @@ algo = GC_DDPG_HER(
     action_size=env.action_space.shape,
     goal_size = env.observation_space.shape,
     epsilon_decay = NUM_STEPS,
-    start_steps=1000
+    start_steps=STARTSTEPS
 )
 
 trainer = Trainer(

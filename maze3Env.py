@@ -42,8 +42,9 @@ class maze3Env(gym.Env):
 
         self.sec = sec
 
+        self._max_episode_steps = 500
         # self._max_episode_steps = 1000
-        self._max_episode_steps = 250
+        # self._max_episode_steps = 250
 
         self.reset()
 
@@ -66,12 +67,12 @@ class maze3Env(gym.Env):
 
         return new_env
 
-    def reset(self, tgtpos=[7.0, 1.5]):
+    def reset(self, tgtpos=[7.5, 1.5]):
         assert self.sim is not None, print("call setting!!") 
         self.sim.reset(sec=self.sec, tgtpos=tgtpos)
         return self.observe()
 
-    def test_reset(self, tgtpos=[7.0, 1.5]):
+    def test_reset(self, tgtpos=[7.5, 1.5]):
         assert self.sim is not None, print("call setting!!") 
         self.sim.test_reset(sec=self.sec, tgtpos=tgtpos)
         return self.observe()
@@ -147,7 +148,6 @@ class maze3Env(gym.Env):
 
     def getState(self):
         return self.sim.getState()
-
 
 if __name__ == '__main__':
     
