@@ -1,7 +1,7 @@
 import gym
 import pybullet_envs
 # from PPO import PPO
-from GC_DDPG_HER import GC_DDPG_HER
+from TDM import TDM
 from trainer import Trainer
 
 # from mazeEnv import mazeEnv 
@@ -29,17 +29,17 @@ STARTSTEPS = 3000
 
 # env = mazeEnv()
 # env = crossEnv()
-# env = square3Env()
-env = maze3Env()
+env = square3Env()
+# env = maze3Env()
 env.setting()
 
 # env_test = mazeEnv()
 # env_test = crossEnv()
-# env_test = square3Env()
-env_test = maze3Env()
+env_test = square3Env()
+# env_test = maze3Env()
 env_test.setting()
 
-algo = GC_DDPG_HER(
+algo = TDM(
     state_size=env.observation_space.shape,
     action_size=env.action_space.shape,
     goal_size = env.observation_space.shape,

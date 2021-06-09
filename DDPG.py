@@ -14,16 +14,35 @@ class ActorNetwork(nn.Module):
     def __init__(self, state_size, action_size, hidden_size=64):
         super().__init__()
 
+        # self.net = nn.Sequential(
+        #     nn.Linear(state_size, hidden_size),
+        #     nn.ELU(inplace=True),
+        #     nn.Linear(hidden_size, hidden_size),
+        #     nn.ELU(inplace=True),
+        #     nn.Linear(hidden_size, action_size),
+        # )
+
         self.net = nn.Sequential(
             nn.Linear(state_size, hidden_size),
             nn.ELU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
             nn.ELU(inplace=True),
-            nn.Linear(hidden_size, action_size),
         )
 
-    def forward(self, states):
-        return torch.tanh(self.net(states))
+        init_w=3e-3
+        self.last_fc = nn.Linear(hidden_size, action_size)
+        self.last_fc.weight.data.uniform_(-init_w, init_w)
+        self.last_fc.bias.data.uniform_(-init_w, init_w)
+
+    def forward(self, states, return_preactivations=False):
+
+        preactivation = self.last_fc(self.net(states))
+        output = torch.tanh(preactivation)
+        if return_preactivations:
+            return output, preactivation
+        else:
+            return output
+        # return torch.tanh(self.net(states))
 
     # def __init__(self, state_size, action_size, hidden_size=64):
     #     super().__init__()
@@ -80,22 +99,22 @@ class CriticNetwork(nn.Module):
     def __init__(self, state_size, action_size, hidden_size=64):
         super().__init__()
 
-        # self.net1 = nn.Sequential(
-        #     nn.Linear(state_size + action_size, hidden_size),
-        #     nn.ELU(inplace=True),
-        #     nn.Linear(hidden_size, hidden_size),
-        #     nn.ELU(inplace=True),
-        #     nn.Linear(hidden_size, 1),
-        # )
-        # self.net2 = nn.Sequential(
-        #     nn.Linear(state_size + action_size, hidden_size),
-        #     nn.ELU(inplace=True),
-        #     nn.Linear(hidden_size, hidden_size),
-        #     nn.ELU(inplace=True),
-        #     nn.Linear(hidden_size, 1),
-        # )
-        self.net1 = CNet(state_size, action_size, hidden_size)
-        self.net2 = CNet(state_size, action_size, hidden_size)
+        self.net1 = nn.Sequential(
+            nn.Linear(state_size + action_size, hidden_size),
+            nn.ELU(inplace=True),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ELU(inplace=True),
+            nn.Linear(hidden_size, 1),
+        )
+        self.net2 = nn.Sequential(
+            nn.Linear(state_size + action_size, hidden_size),
+            nn.ELU(inplace=True),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ELU(inplace=True),
+            nn.Linear(hidden_size, 1),
+        )
+        # self.net1 = CNet(state_size, action_size, hidden_size)
+        # self.net2 = CNet(state_size, action_size, hidden_size)
 
     def forward(self, states, actions):
         x = torch.cat([states, actions], dim=-1)
