@@ -80,44 +80,44 @@ class sim:
                 else:
                     self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=( 6, i, 0))]
 
-    def step(self, action):
+    # def step(self, action):
 
-        self.old_distance = self.distance
+    #     self.old_distance = self.distance
 
-        if not self.done:
-            self.action = action
+    #     if not self.done:
+    #         self.action = action
 
-            l = math.sqrt(action[1]**2 + action[2]**2)
-            cos = action[1] / l
-            sin = action[2] / l
+    #         l = math.sqrt(action[1]**2 + action[2]**2)
+    #         cos = action[1] / l
+    #         sin = action[2] / l
 
-            v  = (self.action[0] + 1.0) * 0.5
+    #         v  = (self.action[0] + 1.0) * 0.5
 
-            self.vx = v * cos
-            self.vy = v * sin
+    #         self.vx = v * cos
+    #         self.vy = v * sin
 
-            self.w = 0
+    #         self.w = 0
 
-            self.updateRobotInfo()
+    #         self.updateRobotInfo()
 
-            self.phisicsClient.stepSimulation()
+    #         self.phisicsClient.stepSimulation()
 
-            if self.isContacts():
-                self.done = True
+    #         if self.isContacts():
+    #             self.done = True
 
-            if self.isArrive():
-                self.done = True
+    #         if self.isArrive():
+    #             self.done = True
 
-        else:
-            self.vx = 0
-            self.vy = 0
-            self.w = 0
+    #     else:
+    #         self.vx = 0
+    #         self.vy = 0
+    #         self.w = 0
 
-        x, y = self.getState()[:2]
-        self.distance = math.sqrt((x - 10.0)**2 + (y - 10.0)**2)
-        self.steps += 1
+    #     x, y = self.getState()[:2]
+    #     self.distance = math.sqrt((x - 10.0)**2 + (y - 10.0)**2)
+    #     self.steps += 1
 
-        return self.done
+    #     return self.done
 
     def observe(self, bullet_lidar):
         pos, ori = self.getRobotPosInfo()
@@ -245,8 +245,8 @@ class sim_maze3(sim):
         # self.old_distance = self.distance
 
     def isArrive(self, tgt_pos, pos):
-        return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
-        # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
+        # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
+        return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
@@ -299,6 +299,7 @@ class sim_maze3(sim):
 
         x, y = self.getState()[:2]
         # self.distance = math.sqrt((x - self.tgt_pos[0])**2 + (y - self.tgt_pos[1])**2)
+        self.steps += 1
 
         return self.done
 

@@ -87,7 +87,14 @@ class Trainer:
             done = False
             episode_return = 0.0
 
-            if self.is_GC:
+            if self.algo.name == 'TDM':
+                for _ in range(self.env_test._max_episode_steps):
+                    action = self.algo.exploit(state, goal, self.env_test.get_left_steps())
+                    state, reward, done, _ = self.env_test.step(action)
+                    episode_return += reward
+                    if done:
+                        break
+            elif self.is_GC:
                 for _ in range(self.env_test._max_episode_steps):
                     action = self.algo.exploit(state, goal)
                     state, reward, done, _ = self.env_test.step(action)
@@ -160,7 +167,9 @@ class Trainer:
         video.write(self.env.render())
 
         for _ in range(self.env._max_episode_steps):
-            if self.is_GC:
+            if self.algo.name == 'TDM':
+                action = self.algo.exploit(state, goal, self.env_test.get_left_steps())
+            elif self.is_GC:
                 action = self.algo.exploit(state, goal)
             else:
                 action = self.algo.exploit(state)
@@ -185,7 +194,9 @@ class Trainer:
 
         for _ in range(self.env._max_episode_steps):
 
-            if self.is_GC:
+            if self.algo.name == 'TDM':
+                action = self.algo.exploit(state, goal, self.env_test.get_left_steps())
+            elif self.is_GC:
                 action = self.algo.exploit(state, goal)
             else:
                 action = self.algo.exploit(state)

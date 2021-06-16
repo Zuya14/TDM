@@ -1,6 +1,90 @@
 import torch
 import numpy as np
+import random
 
+class TDM_ReplayBuffer():
+
+    def __init__(self, buffer_size, state_size, action_size, goal_size, device, num_subgoals=4):
+        self.device=device
+        self.episode = episode()
+        self.num_subgoals = num_subgoals
+
+        # 次にデータを挿入するインデックス．
+        self._p = 0
+        # データ数．
+        self._n = 0
+        # リプレイバッファのサイズ．
+        self.buffer_size = buffer_size
+
+        # GPU上に保存するデータ．
+        self.states = torch.empty((buffer_size, *state_size), dtype=torch.float, device=device)
+        self.actions = torch.empty((buffer_size, *action_size), dtype=torch.float, device=device)
+        self.rewards = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
+        self.dones = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
+        self.next_states = torch.empty((buffer_size, *state_size), dtype=torch.float, device=device)
+        self.goals = torch.empty((buffer_size, *goal_size), dtype=torch.float, device=device)
+        self.collisions = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
+        self.num_steps_left = torch.empty((buffer_size, 1), dtype=torch.float, device=device)
+
+    def append(self, state, action, reward, done, next_state, goal, collision, num_steps_left, save_episode=True):
+        self.states[self._p].copy_(torch.from_numpy(state))
+        self.actions[self._p].copy_(torch.from_numpy(action))
+        self.rewards[self._p] = float(reward)
+        self.dones[self._p] = float(done)
+        self.next_states[self._p].copy_(torch.from_numpy(next_state))
+        self.goals[self._p].copy_(torch.from_numpy(goal))
+        self.collisions[self._p] = float(collision)
+        self.num_steps_left[self._p] = float(num_steps_left)
+
+        if save_episode:
+            self.episode.append(state, action, reward, done, next_state, goal, collision)
+
+        self._p = (self._p + 1) % self.buffer_size
+        self._n = min(self._n + 1, self.buffer_size)
+
+    def _append(self, state, action, reward, done, next_state, goal, collision, num_steps_left):
+        self.states[self._p].copy_(torch.from_numpy(state))
+        self.actions[self._p].copy_(torch.from_numpy(action))
+        self.rewards[self._p] = float(reward)
+        self.dones[self._p] = float(done)
+        self.next_states[self._p].copy_(torch.from_numpy(next_state))
+        self.goals[self._p].copy_(torch.from_numpy(goal))
+        self.collisions[self._p] = float(collision)
+        self.num_steps_left[self._p] = float(num_steps_left)
+  
+        self._p = (self._p + 1) % self.buffer_size
+        self._n = min(self._n + 1, self.buffer_size)
+
+    def sample(self, batch_size):
+        indices = np.random.randint(low=0, high=self._n, size=batch_size)
+        return (
+            self.states[indices],
+            self.actions[indices],
+            self.rewards[indices],
+            self.dones[indices],
+            self.next_states[indices],
+            self.goals[indices],
+            self.num_steps_left[indices]
+        )
+
+    def resample_goals(self, env):
+        states, actions, rewards, dones, next_states, goals, collisions = self.episode()
+        episode_len = self.episode.size()
+        # last_i = episode_len - 1
+
+        # for i in range(episode_len):
+        #     self._append(states[i], actions[i], rewards[i], dones[i], next_states[i], goals[i], collisions[i], last_i-i)
+
+        for i in range(episode_len-1):
+            indices = np.random.randint(low=i, high=episode_len-1, size=self.num_subgoals)
+
+            for index in indices:
+                new_goal = next_states[index]
+                if not collisions[i]:
+                    # self._append(states[i], actions[i], env.calc_reward(collisions[i], states[i], new_goal), dones[i] or env.sim.isArrive(new_goal, next_states[i]), next_states[i], new_goal, collisions[i], index-i)
+                    self._append(states[i], actions[i], env.calc_reward(collisions[i], states[i], new_goal), dones[i] or env.sim.isArrive(new_goal, next_states[i]), next_states[i], new_goal, collisions[i], random.uniform(0, episode_len))
+
+        self.episode = episode()
 
 # class episode:
 #     def __init__(self, device):

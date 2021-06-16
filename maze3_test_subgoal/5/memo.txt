@@ -1,0 +1,19 @@
+init random pos
+tgt fixed
+rewardContact = 0.0
+
+max_episode = 500
+
+HER change done 
+
+ELU
+
+Contact < 0.1
+
+action scale
+
+L2 norm
+
+NUM_STEPS = 10 * 10 ** 4
+
+STARTSTEPS = 3000

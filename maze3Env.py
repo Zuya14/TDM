@@ -105,6 +105,9 @@ class maze3Env(gym.Env):
 
         return observation, reward, done, {}
 
+    def get_left_steps(self):
+        return self._max_episode_steps - self.sim.steps
+
     def observe(self):
         return self.sim.observe()
         # return self.sim.observe(self.lidar)
@@ -117,16 +120,17 @@ class maze3Env(gym.Env):
 
     def calc_reward(self, contact, pos, tgt_pos):
         # rewardContact = -1000.0 if contact else 0.0
-        # rewardContact = -100.0 if contact else 0.0
+        rewardContact = -100.0 if contact else 0.0
         # rewardContact = -10.0 if contact else 0.0
         # rewardContact = -50.0 if contact else 0.0
-        rewardContact = 0.0
+        # rewardContact = 0.0
         # rewardDistance = - np.linalg.norm(pos - tgt_pos, ord=2)
         # rewardDistance = 1.0 if np.linalg.norm(pos - tgt_pos, ord=2) < 0.1 else 0.0
         # rewardDistance = 0.0 if (not contact) and (np.linalg.norm(pos - tgt_pos, ord=2) < 0.1) else -1.0
         # rewardDistance = 1.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else 0.0
         rewardDistance = 0.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else -1.0
         # rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=2)
+        # rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=1)
         reward = rewardContact + rewardDistance
         # reward = rewardDistance
 
