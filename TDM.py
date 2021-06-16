@@ -14,22 +14,23 @@ class CriticNetwork(nn.Module):
             nn.ELU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
             nn.ELU(inplace=True),
-            # nn.Linear(hidden_size, 1),
-            nn.Linear(hidden_size, goal_size),
+            nn.Linear(hidden_size, 1),
+            # nn.Linear(hidden_size, goal_size),
         )
         self.net2 = nn.Sequential(
             nn.Linear(state_size + action_size, hidden_size),
             nn.ELU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
             nn.ELU(inplace=True),
-            # nn.Linear(hidden_size, 1),
-            nn.Linear(hidden_size, goal_size),
+            nn.Linear(hidden_size, 1),
+            # nn.Linear(hidden_size, goal_size),
         )
 
     def forward(self, states, actions, goals):
         x = torch.cat([states, actions], dim=-1)
-        # return self.net1(x), self.net2(x)
-        return -torch.abs(goals - self.net1(x)),  -torch.abs(goals - self.net2(x))
+        return self.net1(x), self.net2(x)
+        # return -torch.abs(goals - self.net1(x)),  -torch.abs(goals - self.net2(x))
+        # return -torch.abs(goals - self.net1(x)).sum(),  -torch.abs(goals - self.net2(x)).sum()
 
 class TDM(DDPG):
 
@@ -97,7 +98,8 @@ class TDM(DDPG):
     def exploit(self, state, goal, num_steps_left):
         """ 決定論的な行動を返す． """
         # state = torch.tensor(np.concatenate([state, goal]), dtype=torch.float, device=self.device).unsqueeze_(0)
-        state = torch.tensor(np.concatenate([state, goal-state, np.array([num_steps_left])]), dtype=torch.float, device=self.device).unsqueeze_(0)
+        # state = torch.tensor(np.concatenate([state, goal-state, np.array([num_steps_left])]), dtype=torch.float, device=self.device).unsqueeze_(0)
+        state = torch.tensor(np.concatenate([state, goal-state, np.array([np.log(num_steps_left+2)])]), dtype=torch.float, device=self.device).unsqueeze_(0)
         with torch.no_grad():
             action = self.actor(state)
         return action.cpu().numpy()[0]
@@ -154,13 +156,15 @@ class TDM(DDPG):
 
     def update_critic(self, states, actions, rewards, dones, next_states, goals, num_steps_left):
         # states2 = torch.cat([states, goals], dim=-1)
-        states2 = torch.cat([states, goals-states, num_steps_left], dim=-1)
+        # states2 = torch.cat([states, goals-states, num_steps_left], dim=-1)
+        states2 = torch.cat([states, goals-states, torch.log(num_steps_left+2)], dim=-1)
         curr_qs1, curr_qs2 = self.critic(states2, actions, goals)
 
         with torch.no_grad():
             # next_states2 = torch.cat([next_states, goals], dim=-1)
             # next_states2 = torch.cat([next_states, goals-next_states], dim=-1)
-            next_states2 = torch.cat([next_states, goals-next_states, num_steps_left-1], dim=-1)
+            # next_states2 = torch.cat([next_states, goals-next_states, num_steps_left-1], dim=-1)
+            next_states2 = torch.cat([next_states, goals-next_states,  torch.log(num_steps_left+2-1)], dim=-1)
             next_actions = self.actor(next_states2)
 
             next_qs1, next_qs2 = self.critic_target(next_states2, next_actions, goals)
@@ -180,7 +184,8 @@ class TDM(DDPG):
 
     def update_actor(self, states, goals, num_steps_left):
         # states2 = torch.cat([states, goals], dim=-1)
-        states2 = torch.cat([states, goals-states, num_steps_left], dim=-1)
+        # states2 = torch.cat([states, goals-states, num_steps_left], dim=-1)
+        states2 = torch.cat([states, goals-states, torch.log(num_steps_left+2)], dim=-1)
         # actions = self.actor(states2)
         actions, pre_tanh_value = self.actor(states2, return_preactivations=True)
         qs1, qs2 = self.critic(states2, actions, goals)

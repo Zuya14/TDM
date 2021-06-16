@@ -119,6 +119,7 @@ class maze3Env(gym.Env):
         return self.calc_reward(self.sim.isContacts(), self.sim.observe(), self.sim.tgt_pos)
 
     def calc_reward(self, contact, pos, tgt_pos):
+        # rewardContact = -10000.0 if contact else 0.0
         # rewardContact = -1000.0 if contact else 0.0
         # rewardContact = -100.0 if contact else 0.0
         # rewardContact = -10.0 if contact else 0.0
@@ -131,6 +132,7 @@ class maze3Env(gym.Env):
         # rewardDistance = 0.0 if (not contact) and self.sim.isArrive(tgt_pos, pos) else -1.0
         # rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=2)
         rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=1)
+        # rewardDistance = - np.abs(tgt_pos - pos)
         reward = rewardContact + rewardDistance
         # reward = rewardDistance
 

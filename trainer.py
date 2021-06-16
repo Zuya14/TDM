@@ -92,6 +92,7 @@ class Trainer:
                     action = self.algo.exploit(state, goal, self.env_test.get_left_steps())
                     state, reward, done, _ = self.env_test.step(action)
                     episode_return += reward
+                    # episode_return += sum(reward)
                     if done:
                         break
             elif self.is_GC:
