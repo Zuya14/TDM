@@ -1,0 +1,26 @@
+init random pos
+tgt fixed
+rewardContact = 0.0
+rewardDistance = - np.linalg.norm(tgt_pos - pos, ord=1)
+
+max_episode = 250
+
+HER change done 
+
+ELU
+
+Contact < 0.1
+
+action scale
+
+L2 norm
+
+NUM_STEPS = 3 * 10 ** 4
+
+STARTSTEPS = 3000
+
+actor pre_activation_policy_loss 0.01
+
+critic net(x)
+
+step log(step+2)

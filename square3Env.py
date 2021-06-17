@@ -45,7 +45,8 @@ class square3Env(gym.Env):
 
         # self._max_episode_steps = 1000
         # self._max_episode_steps = 200
-        self._max_episode_steps = 250
+        # self._max_episode_steps = 250
+        self._max_episode_steps = 100
 
         self.reset()
 

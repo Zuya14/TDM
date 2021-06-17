@@ -207,6 +207,9 @@ class sim_maze3(sim):
             self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(  4,  i, 0))]
             self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(  5,  i, 0))]
 
+    def _reset(self, x, y, sec):
+        super().reset(x=x, y=y, sec=sec)
+        
     def reset(self, sec, tgtpos=[7.5, 1.5]):
         # init_pos = np.array([1.5, 1.5])
         init_pos = np.random.rand(2) * 8.5
@@ -216,27 +219,30 @@ class sim_maze3(sim):
             init_pos = np.random.rand(2) * 8.5
             init_pos = init_pos + 0.25 
 
-        super().reset(x=init_pos[0], y=init_pos[1], sec=sec)
+        self._reset(x=init_pos[0], y=init_pos[1], sec=sec)
+        
 
-        # tgt_pos = np.random.rand(2) * 8.5
-        # tgt_pos = tgt_pos + 0.25 
+        tgt_pos = np.random.rand(2) * 8.5
+        tgt_pos = tgt_pos + 0.25 
 
-        # while onRect(tgt_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]) or math.sqrt((init_pos[0] - tgt_pos[0])**2 + (init_pos[1] - tgt_pos[1])**2) < 1.0:
-        #     tgt_pos = np.random.rand(2) * 8.5
-        #     tgt_pos = tgt_pos + 0.25 
+        while onRect(tgt_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]) or math.sqrt((init_pos[0] - tgt_pos[0])**2 + (init_pos[1] - tgt_pos[1])**2) < 1.0:
+            tgt_pos = np.random.rand(2) * 8.5
+            tgt_pos = tgt_pos + 0.25 
 
-        # self.tgt_pos = tgt_pos
+        self.tgt_pos = tgt_pos
 
-        self.tgt_pos = np.array(tgtpos)
+        # self.tgt_pos = np.array(tgtpos)
 
         x, y = self.getState()[:2]
         # self.distance = math.sqrt((x - self.tgt_pos[0])**2 + (y - self.tgt_pos[1])**2)
         # self.old_distance = self.distance
+
+        self.steps = 0
 
     def test_reset(self, sec, tgtpos=[7.5, 1.5]):
         init_pos = np.array([1.5, 1.5])
 
-        super().reset(x=init_pos[0], y=init_pos[1], sec=sec)
+        self._reset(x=init_pos[0], y=init_pos[1], sec=sec)
 
         self.tgt_pos = np.array(tgtpos)
 
@@ -244,15 +250,18 @@ class sim_maze3(sim):
         # self.distance = math.sqrt((x - self.tgt_pos[0])**2 + (y - self.tgt_pos[1])**2)
         # self.old_distance = self.distance
 
+        self.steps = 0
+
     def isArrive(self, tgt_pos, pos):
-        # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
-        return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
+        return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
+        # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.5
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
+        # return False
 
     def step(self, action):
 
@@ -392,6 +401,7 @@ class sim_square3(sim_maze3):
         init_pos = np.random.rand(2) * 8.5
         init_pos = init_pos + 0.25 
 
+        self._reset(x=init_pos[0], y=init_pos[1], sec=sec)
 
         tgt_pos = np.random.rand(2) * 8.5
         tgt_pos = tgt_pos + 0.25 
@@ -408,6 +418,7 @@ class sim_square3(sim_maze3):
         super().reset(sec=sec)
         init_pos = np.array([1.5, 1.5])
 
+        self._reset(x=init_pos[0], y=init_pos[1], sec=sec)
 
         self.tgt_pos = np.array(tgtpos)
 

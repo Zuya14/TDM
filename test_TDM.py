@@ -21,12 +21,6 @@ EVAL_INTERVAL = 10 ** 3
 # env = gym.make(ENV_ID)
 # env_test = gym.make(ENV_ID)
 
-# env = mazeEnv()
-# env = crossEnv()
-env = square3Env()
-# env = maze3Env()
-env.setting()
-
 # env_test = mazeEnv()
 # env_test = crossEnv()
 env_test = square3Env()
@@ -34,13 +28,13 @@ env_test = square3Env()
 env_test.setting()
 
 algo = TDM(
-    state_size=env.observation_space.shape,
-    action_size=env.action_space.shape,
-    goal_size = env.observation_space.shape
+    state_size=env_test.observation_space.shape,
+    action_size=env_test.action_space.shape,
+    goal_size = env_test.observation_space.shape
 )
 
 trainer = Trainer(
-    env=env,
+    env=env_test,
     env_test=env_test,
     algo=algo,
     num_steps=NUM_STEPS,
