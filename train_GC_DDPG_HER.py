@@ -12,9 +12,9 @@ from maze3Env import maze3Env
 # ENV_ID = 'InvertedPendulumBulletEnv-v0'
 SEED = 0
 # NUM_STEPS = 5 * 10 ** 4
-# NUM_STEPS = 3 * 10 ** 4
+NUM_STEPS = 3 * 10 ** 4
 # NUM_STEPS = 5 * 10 ** 4
-NUM_STEPS = 10 * 10 ** 4
+# NUM_STEPS = 10 * 10 ** 4
 # NUM_STEPS = 2 * 10 ** 5
 # NUM_STEPS = 25 * 10 ** 4
 # NUM_STEPS = 1 * 10 ** 5
@@ -29,17 +29,18 @@ STARTSTEPS = 3000
 
 # env = mazeEnv()
 # env = crossEnv()
-# env = square3Env()
-env = maze3Env()
+env = square3Env()
+# env = maze3Env()
 env.setting()
 
 # env_test = mazeEnv()
 # env_test = crossEnv()
-# env_test = square3Env()
-env_test = maze3Env()
+env_test = square3Env()
+# env_test = maze3Env()
 env_test.setting()
 
 algo = GC_DDPG_HER(
+    # replay_size=10**4,
     state_size=env.observation_space.shape,
     action_size=env.action_space.shape,
     goal_size = env.observation_space.shape,

@@ -45,20 +45,40 @@ class ActorNetwork(nn.Module):
     def __init__(self, state_size, action_size, hidden_size=64):
         super().__init__()
 
+        # self.net = nn.Sequential(
+        #     nn.Linear(state_size, hidden_size),
+        #     nn.ReLU(inplace=True),
+        #     nn.Linear(hidden_size, hidden_size),
+        #     nn.ReLU(inplace=True),
+        #     nn.Linear(hidden_size, 2*action_size),
+        # )
+        
         self.net = nn.Sequential(
             nn.Linear(state_size, hidden_size),
-            nn.ReLU(inplace=True),
+            nn.ELU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(inplace=True),
-            nn.Linear(hidden_size, 2*action_size),
+            nn.ELU(inplace=True),
         )
 
-    def forward(self, states):
-        return torch.tanh(self.net(states).chunk(2, dim=-1)[0])
+        init_w=3e-3
+        self.last_fc = nn.Linear(hidden_size, 2*action_size)
+        self.last_fc.weight.data.uniform_(-init_w, init_w)
+        self.last_fc.bias.data.uniform_(-init_w, init_w)
 
-    def sample(self, states):
-        means, log_stds = self.net(states).chunk(2, dim=-1)
-        return reparameterize(means, log_stds.clamp(-20, 2))
+    def forward(self, states):
+        preactivation = self.last_fc(self.net(states))
+        return torch.tanh(preactivation.chunk(2, dim=-1)[0])
+        # return torch.tanh(self.net(states).chunk(2, dim=-1)[0])
+
+    def sample(self, states, return_preactivations=False):
+        preactivation = self.last_fc(self.net(states))
+        means, log_stds = preactivation.chunk(2, dim=-1)
+        if return_preactivations:
+            return *reparameterize(means, log_stds.clamp(-20, 2)), preactivation
+        else:
+            return reparameterize(means, log_stds.clamp(-20, 2))
+        # means, log_stds = self.net(states).chunk(2, dim=-1)
+        # return reparameterize(means, log_stds.clamp(-20, 2))
 
 
 class GC_SAC_HER(DDPG):
@@ -202,9 +222,16 @@ class GC_SAC_HER(DDPG):
     def update_actor(self, states, goals):
         # states2 = torch.cat([states, goals], dim=-1)
         states2 = torch.cat([states, goals-states], dim=-1)
-        actions, log_pis = self.actor.sample(states2)
+        # actions, log_pis = self.actor.sample(states2)
+        actions, log_pis, pre_tanh_value = self.actor.sample(states2, return_preactivations=True)
         qs1, qs2 = self.critic(states2, actions)
-        loss_actor = (self.alpha * log_pis - torch.min(qs1, qs2)).mean()
+
+        pre_activation_policy_loss = (
+            (pre_tanh_value**2).sum(dim=1).mean()
+        )
+
+        # loss_actor = (self.alpha * log_pis - torch.min(qs1, qs2)).mean()
+        loss_actor = (self.alpha * log_pis - torch.min(qs1, qs2)).mean()# + pre_activation_policy_loss * 0.001
 
         self.optim_actor.zero_grad()
         loss_actor.backward(retain_graph=False)

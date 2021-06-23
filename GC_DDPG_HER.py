@@ -151,7 +151,7 @@ class GC_DDPG_HER(DDPG):
         )
         
         # loss_actor = -torch.min(qs1, qs2).mean()
-        loss_actor = -torch.min(qs1, qs2).mean() + pre_activation_policy_loss * 0.01
+        loss_actor = -torch.min(qs1, qs2).mean() + pre_activation_policy_loss * 0.001
 
 
         self.optim_actor.zero_grad()

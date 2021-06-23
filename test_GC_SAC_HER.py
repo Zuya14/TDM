@@ -6,8 +6,9 @@ from trainer import Trainer
 
 # from mazeEnv import mazeEnv 
 # from crossEnv import crossEnv 
-# from squareEnv import squareEnv 
+from square3Env import square3Env 
 from maze3Env import maze3Env 
+import numpy as np
 
 # ENV_ID = 'InvertedPendulumBulletEnv-v0'
 SEED = 0
@@ -22,14 +23,14 @@ EVAL_INTERVAL = 10 ** 3
 
 # env = mazeEnv()
 # env = crossEnv()
-# env = squareEnv()
-env = maze3Env()
+env = square3Env()
+# env = maze3Env()
 env.setting()
 
 # env_test = mazeEnv()
 # env_test = crossEnv()
-# env_test = squareEnv()
-env_test = maze3Env()
+env_test = square3Env()
+# env_test = maze3Env()
 env_test.setting()
 
 algo = GC_SAC_HER(
@@ -50,3 +51,26 @@ trainer = Trainer(
 algo.load()
 
 trainer.saveVideo()
+
+subgoals = np.array(
+    [
+        [1.5, 4.5],
+        [1.5, 7.5],
+        [4.5, 7.5],
+        [7.5, 7.5],
+        [7.5, 4.5],
+        [7.5, 1.5]
+    ]
+)
+
+trainer.saveVideo_subgoals(subgoals=subgoals, s="_subgoals")
+
+subgoals = np.array(
+    [
+        [1.5, 7.5],
+        [7.5, 7.5],
+        [7.5, 1.5]
+    ]
+)
+
+trainer.saveVideo_subgoals(subgoals=subgoals, s="_subgoals2")

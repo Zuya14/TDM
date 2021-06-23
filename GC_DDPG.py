@@ -138,9 +138,16 @@ class GC_DDPG(DDPG):
     def update_actor(self, states, goals):
         # states2 = torch.cat([states, goals], dim=-1)
         states2 = torch.cat([states, goals-states], dim=-1)
-        actions = self.actor(states2)
+        # actions = self.actor(states2)
+        actions, pre_tanh_value = self.actor(states2, return_preactivations=True)
         qs1, qs2 = self.critic(states2, actions)
-        loss_actor = -torch.min(qs1, qs2).mean()
+
+        pre_activation_policy_loss = (
+            (pre_tanh_value**2).sum(dim=1).mean()
+        )
+
+        # loss_actor = -torch.min(qs1, qs2).mean()
+        loss_actor = -torch.min(qs1, qs2).mean() + pre_activation_policy_loss * 0.001
 
         self.optim_actor.zero_grad()
         loss_actor.backward(retain_graph=False)

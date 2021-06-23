@@ -222,16 +222,16 @@ class sim_maze3(sim):
         self._reset(x=init_pos[0], y=init_pos[1], sec=sec)
         
 
-        tgt_pos = np.random.rand(2) * 8.5
-        tgt_pos = tgt_pos + 0.25 
+        # tgt_pos = np.random.rand(2) * 8.5
+        # tgt_pos = tgt_pos + 0.25 
 
-        while onRect(tgt_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]) or math.sqrt((init_pos[0] - tgt_pos[0])**2 + (init_pos[1] - tgt_pos[1])**2) < 1.0:
-            tgt_pos = np.random.rand(2) * 8.5
-            tgt_pos = tgt_pos + 0.25 
+        # while onRect(tgt_pos, [3.0-0.25, 0.0-0.25], [6.0+0.25, 6.0+0.25]) or math.sqrt((init_pos[0] - tgt_pos[0])**2 + (init_pos[1] - tgt_pos[1])**2) < 1.0:
+        #     tgt_pos = np.random.rand(2) * 8.5
+        #     tgt_pos = tgt_pos + 0.25 
 
-        self.tgt_pos = tgt_pos
+        # self.tgt_pos = tgt_pos
 
-        # self.tgt_pos = np.array(tgtpos)
+        self.tgt_pos = np.array(tgtpos)
 
         x, y = self.getState()[:2]
         # self.distance = math.sqrt((x - self.tgt_pos[0])**2 + (y - self.tgt_pos[1])**2)
@@ -253,12 +253,12 @@ class sim_maze3(sim):
         self.steps = 0
 
     def isArrive(self, tgt_pos, pos):
-        return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
+        # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.1
         # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.1
-        # return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.5
+        return  np.linalg.norm(tgt_pos - pos, ord=1) < 0.5
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
         # return  np.linalg.norm(tgt_pos - pos, ord=2) < 0.5
         # return False
@@ -389,11 +389,11 @@ class sim_square3(sim_maze3):
             baseOrientation = self.robotOri
             )
 
-        for i in range(10):
-            self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(i-1,  9, 0))]
-            self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(  i, -1, 0))]
-            self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=( -1,i-1, 0))]
-            self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(  9,  i, 0))]
+        # for i in range(10):
+        #     self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(i-1,  9, 0))]
+        #     self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(  i, -1, 0))]
+        #     self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=( -1,i-1, 0))]
+        #     self.bodyUniqueIds += [self.phisicsClient.loadURDF("urdf/wall.urdf", basePosition=(  9,  i, 0))]
 
     def reset(self, sec, tgtpos=[7.5, 1.5]):
         super().reset(sec=sec)
@@ -403,12 +403,12 @@ class sim_square3(sim_maze3):
 
         self._reset(x=init_pos[0], y=init_pos[1], sec=sec)
 
-        tgt_pos = np.random.rand(2) * 8.5
-        tgt_pos = tgt_pos + 0.25 
+        # tgt_pos = np.random.rand(2) * 8.5
+        # tgt_pos = tgt_pos + 0.25 
 
-        self.tgt_pos = tgt_pos
+        # self.tgt_pos = tgt_pos
 
-        # self.tgt_pos = np.array(tgtpos)
+        self.tgt_pos = np.array(tgtpos)
 
         x, y = self.getState()[:2]
         # self.distance = math.sqrt((x - self.tgt_pos[0])**2 + (y - self.tgt_pos[1])**2)
